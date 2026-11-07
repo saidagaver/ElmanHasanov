@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="az"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Normativ nəticələri</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--tx:#1b1f24;--mu:#667085;--bd:#dde1e7;--ac:#2456d6;--g5:#1f9d55;--g4:#2b7de0;--g3:#d98a00;--g2:#d33a3a;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14171c;--card:#1d2127;--tx:#e8eaee;--mu:#9aa3b0;--bd:#323843;--ac:#6b93ff;--g5:#3ecf80;--g4:#5ba2ff;--g3:#f0b13a;--g2:#ff6b6b;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#14171c;--card:#1d2127;--tx:#e8eaee;--mu:#9aa3b0;--bd:#323843;--ac:#6b93ff;--g5:#3ecf80;--g4:#5ba2ff;--g3:#f0b13a;--g2:#ff6b6b;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;padding:14px}
+h1{font-size:20px;margin:0 0 4px}.mu{color:var(--mu);font-size:13px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px;margin:10px 0}
+input,select,button{font:inherit;color:var(--tx);background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:7px 9px}
+button{cursor:pointer;background:var(--ac);color:#fff;border-color:var(--ac)}
+button.sec{background:transparent;color:var(--tx);border-color:var(--bd)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.tabs button{background:var(--card);color:var(--tx);border-color:var(--bd)}
+.tabs button.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+.sc{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:700px}
+th,td{border-bottom:1px solid var(--bd);padding:4px 6px;text-align:center}
+th{font-size:12px;color:var(--mu);font-weight:600}
+td input{width:100%;min-width:60px;text-align:center}td.nm input{text-align:left;min-width:110px}
+.g{font-weight:700;width:34px}.g5{color:var(--g5)}.g4{color:var(--g4)}.g3{color:var(--g3)}.g2{color:var(--g2)}
+.kp{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.kp div{background:var(--bg);border:1px solid var(--bd);border-radius:10px;padding:10px}
+.kp b{display:block;font-size:19px}
+.lg{font-size:12px;color:var(--mu)}
+</style></head><body>
+<div class="row"><div style="flex:1;min-width:200px"><h1>Normativ nəticələri</h1>
+<div class="row"><span class="mu">Müəllim:</span><input id="tch" style="min-width:180px"></div></div></div>
+<div class="card"><div class="row"><b>Yeni tağım:</b><input id="pn" placeholder="Tağım adı / nömrəsi" style="min-width:160px">
+<select id="pc"><option value="1">1-ci kurs</option><option value="2">2-ci kurs</option><option value="3">3-cü kurs</option><option value="4">4-cü kurs</option></select>
+<button id="add">Əlavə et</button></div>
+<div class="lg" style="margin-top:6px">Vaxtı 3:50 (dəq:san) və ya yalnız saniyə kimi yaz. 100 m üçün 14.3 kimi.</div></div>
+<div class="tabs" id="tabs"></div><div id="main"></div>
+<script>
+var S={teacher:'Elman Həsənov',platoons:[]},cur='sum',KEY='normativ_v1';
+try{var L=localStorage.getItem(KEY);if(L)S=JSON.parse(L)}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function mkRows(n){var a=[];for(var i=0;i<n;i++)a.push({nm:'',p:'',t:'',s:''});return a}
+function parseT(v){v=String(v).trim().replace(',','.');if(!v)return null;if(v.indexOf(':')>-1){var x=v.split(':'),m=parseFloat(x[0]),s=parseFloat(x[1]);return isNaN(m)||isNaN(s)?null:m*60+s}var n=parseFloat(v);return isNaN(n)?null:n}
+function fmt(s){if(s==null||isNaN(s))return '–';var m=Math.floor(s/60),r=s-m*60;return m+':'+(r<10?'0':'')+r.toFixed(0)}
+function by(s,a,b,c){return s<=a?5:s<=b?4:s<=c?3:2}
+function gP(v,c){var n=parseFloat(v);if(isNaN(n))return null;var b=c<=2?10:11;return n>=b+2?5:n==b+1?4:n==b?3:2}
+function g1(v,c){var s=parseT(v);if(s==null)return null;var d=c>=3?10:0;return by(s,225-d,235-d,245-d)}
+function g100(v,c){var s=parseT(v);if(s==null)return null;var d=c>=3?.5:0;return by(s,14-d,14.5-d,15-d)}
+function gr(r,c){return[gP(r.p,c),g1(r.t,c),g100(r.s,c)]}
+function mean(a){a=a.filter(function(x){return x!=null&&!isNaN(x)});return a.length?a.reduce(function(x,y){return x+y},0)/a.length:null}
+function sAvg(r,c){return mean(gr(r,c))}
+function st(pl){var c=+pl.course,av=[],P=[],T=[],H=[],fail=0,n=0;
+pl.rows.forEach(function(r){var g=gr(r,c),a=fin(g);if(a==null)return;n++;av.push(a);if(a==2)fail++;
+if(g[0]!=null)P.push(parseFloat(r.p));if(g[1]!=null)T.push(parseT(r.t));if(g[2]!=null)H.push(parseT(r.s))});
+return{n:n,avg:mean(av),p:mean(P),t:mean(T),h:mean(H),fail:n?fail/n*100:null,av:av}}
+function f2(x,d){return x==null?'–':x.toFixed(d==null?2:d)}
+var W={2:'qeyri-kafi',3:'kafi',4:'yaxşı',5:'əla'};
+function gc(g){return g==null?'':'<span class="g g'+g+'">'+g+'</span> <span class="lg">'+W[g]+'</span>'}
+function fin(g){var a=g.filter(function(x){return x!=null});if(!a.length)return null;if(a.indexOf(2)>-1)return 2;if(a.filter(function(x){return x==3}).length>=2)return 3;var m=mean(a),f=Math.floor(m);return m-f>0.5?f+1:f}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}
+function tabs(){var h='<button class="'+(cur=='sum'?'on':'')+'" data-t="sum">Yekun</button>';
+S.platoons.forEach(function(p){h+='<button class="'+(cur==p.id?'on':'')+'" data-t="'+p.id+'">'+esc(p.name)+' ('+p.course+'-ci kurs)</button>'});
+document.getElementById('tabs').innerHTML=h}
+function render(){tabs();var m=document.getElementById('main');
+if(cur=='sum'){m.innerHTML=summary();return}
+var pl=S.platoons.filter(function(p){return p.id==cur})[0];if(!pl){cur='sum';render();return}
+var h='<div class="card"><div class="row"><input id="en" value="'+esc(pl.name)+'" style="min-width:150px"><select id="ec">';
+for(var k=1;k<=4;k++)h+='<option value="'+k+'"'+(pl.course==k?' selected':'')+'>'+k+'-ci kurs</option>';
+h+='</select><button class="sec" id="del">Tağımı sil</button></div>';
+h+='<div class="lg" style="margin-top:6px">'+(pl.course<=2?'Turnik: 10→3, 11→4, 12+→5 · 1000 m: ≤4:05→3, ≤3:55→4, ≤3:45→5 · 100 m: ≤15→3, ≤14.5→4, ≤14→5':'Turnik: 11→3, 12→4, 13+→5 · 1000 m: ≤3:55→3, ≤3:45→4, ≤3:35→5 · 100 m: ≤14.5→3, ≤14→4, ≤13.5→5')+'</div></div>';
+h+='<div class="card" id="pst"></div><div class="card sc"><table><tr><th>№</th><th>Ad (istəyə bağlı)</th><th>Turnik</th><th>Q</th><th>1000 m</th><th>Q</th><th>100 m</th><th>Q</th><th>Yekun</th></tr>';
+pl.rows.forEach(function(r,i){h+='<tr><td>'+(i+1)+'</td><td class="nm"><input data-i="'+i+'" data-f="nm" value="'+esc(r.nm)+'"></td>'+
+'<td><input inputmode="numeric" data-i="'+i+'" data-f="p" value="'+esc(r.p)+'"></td><td id="a'+i+'"></td>'+
+'<td><input data-i="'+i+'" data-f="t" value="'+esc(r.t)+'" placeholder="3:50"></td><td id="b'+i+'"></td>'+
+'<td><input inputmode="decimal" data-i="'+i+'" data-f="s" value="'+esc(r.s)+'" placeholder="14.2"></td><td id="c'+i+'"></td><td id="d'+i+'" style="white-space:nowrap"></td></tr>'});
+h+='</table><div style="margin-top:8px"><button class="sec" id="more">+ Sətir əlavə et</button></div></div>';
+m.innerHTML=h;pl.rows.forEach(function(r,i){rowU(pl,i)});pst(pl)}
+function rowU(pl,i){var r=pl.rows[i],g=gr(r,+pl.course),a=fin(g),q=function(id,h){var e=document.getElementById(id);if(e)e.innerHTML=h};
+q('a'+i,gc(g[0]));q('b'+i,gc(g[1]));q('c'+i,gc(g[2]));q('d'+i,gc(a))}
+function pst(pl){var s=st(pl),e=document.getElementById('pst');if(!e)return;
+e.innerHTML='<div class="kp"><div>Orta qiymət<b>'+f2(s.avg)+'</b></div><div>Nəticə daxil edilən<b>'+s.n+' nəfər</b></div><div>Orta turnik<b>'+f2(s.p,1)+'</b></div><div>Orta 1000 m<b>'+fmt(s.t)+'</b></div><div>Orta 100 m<b>'+f2(s.h,1)+' san</b></div><div>Qeyri-kafi (2) olan<b>'+(s.fail==null?'–':f2(s.fail,0)+'%')+'</b></div></div>'}
+function summary(){if(!S.platoons.length)return '<div class="card mu">Hələ tağım yoxdur. Yuxarıdan əlavə et.</div>';
+var L=S.platoons.map(function(p){return{p:p,s:st(p)}}).filter(function(x){return x.s.n>0});
+if(!L.length)return '<div class="card mu">Nəticə daxil edildikdən sonra yekun burada görünəcək.</div>';
+L.sort(function(a,b){return b.s.avg-a.s.avg});
+var cs={},all=[];L.forEach(function(x){var c=x.p.course;(cs[c]=cs[c]||[]).push.apply(cs[c],x.s.av);all.push.apply(all,x.s.av)});
+var cl=Object.keys(cs).map(function(c){return{c:c,a:mean(cs[c]),n:cs[c].length}}).sort(function(a,b){return b.a-a.a});
+var h='<div class="card"><div class="kp"><div>Ən yaxşı tağım<b>'+esc(L[0].p.name)+'</b><span class="mu">'+f2(L[0].s.avg)+' ('+L[0].p.course+'-ci kurs)</span></div>'+
+'<div>Ən yaxşı kurs<b>'+cl[0].c+'-ci kurs</b><span class="mu">'+f2(cl[0].a)+'</span></div><div>Ümumi orta<b>'+f2(mean(all))+'</b><span class="mu">'+all.length+' nəfər</span></div></div></div>';
+h+='<div class="card sc"><b>Tağımların reytinqi</b><table><tr><th>Yer</th><th>Tağım</th><th>Kurs</th><th>Say</th><th>Orta qiymət</th><th>Turnik</th><th>1000 m</th><th>100 m</th><th>2 olan %</th></tr>';
+L.forEach(function(x,i){h+='<tr><td>'+(i+1)+'</td><td>'+esc(x.p.name)+'</td><td>'+x.p.course+'</td><td>'+x.s.n+'</td><td class="g">'+f2(x.s.avg)+'</td><td>'+f2(x.s.p,1)+'</td><td>'+fmt(x.s.t)+'</td><td>'+f2(x.s.h,1)+'</td><td>'+f2(x.s.fail,0)+'</td></tr>'});
+h+='</table></div><div class="card sc"><b>Kursların orta göstəricisi</b><table><tr><th>Kurs</th><th>Say</th><th>Orta qiymət</th></tr>';
+cl.sort(function(a,b){return a.c-b.c}).forEach(function(x){h+='<tr><td>'+x.c+'-ci kurs</td><td>'+x.n+'</td><td class="g">'+f2(x.a)+'</td></tr>'});
+return h+'</table></div>'}
+document.getElementById('tch').value=S.teacher;
+document.getElementById('tch').oninput=function(){S.teacher=this.value;save()};
+document.getElementById('add').onclick=function(){var n=document.getElementById('pn').value.trim();if(!n)return;
+var id='p'+Date.now();S.platoons.push({id:id,name:n,course:+document.getElementById('pc').value,rows:mkRows(25)});
+document.getElementById('pn').value='';cur=id;save();render()};
+document.getElementById('tabs').onclick=function(e){var t=e.target.getAttribute('data-t');if(t){cur=t;render()}};
+document.getElementById('main').addEventListener('input',function(e){var pl=S.platoons.filter(function(p){return p.id==cur})[0];if(!pl)return;var t=e.target;
+if(t.id=='en'){pl.name=t.value;save();tabs();return}
+var i=t.getAttribute('data-i');if(i==null)return;pl.rows[i][t.getAttribute('data-f')]=t.value;save();rowU(pl,+i);pst(pl)});
+document.getElementById('main').addEventListener('change',function(e){if(e.target.id=='ec'){var pl=S.platoons.filter(function(p){return p.id==cur})[0];pl.course=+e.target.value;save();render()}});
+document.getElementById('main').addEventListener('click',function(e){var pl=S.platoons.filter(function(p){return p.id==cur})[0];if(!pl)return;
+if(e.target.id=='more'){pl.rows.push({nm:'',p:'',t:'',s:''});save();render()}
+if(e.target.id=='del'){if(e.target.getAttribute('data-s')){S.platoons=S.platoons.filter(function(p){return p.id!=cur});cur='sum';save();render()}else{e.target.setAttribute('data-s','1');e.target.textContent='Əminsən? Bir daha bas'}}});
+render();
+</script></body></html>
